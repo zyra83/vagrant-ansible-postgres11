@@ -1,0 +1,40 @@
+
+# Created by https://www.gitignore.io/api/code,linux,vagrant,ansible
+# Edit at https://www.gitignore.io/?templates=code,linux,vagrant,ansible
+
+### Ansible ###
+*.retry
+
+### Code ###
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+### Linux ###
+*~
+
+# temporary files which can be created if a process still has a handle open of a deleted file
+.fuse_hidden*
+
+# KDE directory preferences
+.directory
+
+# Linux trash folder which might appear on any partition or disk
+.Trash-*
+
+# .nfs files are created when an open file is removed but is still being accessed
+.nfs*
+
+### Vagrant ###
+# General
+.vagrant/
+
+# Log files (if you are creating logs in debug mode, uncomment this)
+# *.log
+
+### Vagrant Patch ###
+*.box
+
+# End of https://www.gitignore.io/api/code,linux,vagrant,ansible

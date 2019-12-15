@@ -1,0 +1,114 @@
+---
+- name: prépa machine pour ansible
+  hosts: all
+  become: true
+  # cette étape installe un prérequis à Ansible, 
+  # par conséquent la collecte de données ne fonctionerait pas
+  gather_facts: false
+  tasks:
+  - name: "Installation de python en utilisant apt"
+    shell: 
+      cmd: apt-get update && apt install -y python
+      creates: "/usr/bin/python"
+
+
+      
+
+- name: conf pg
+  hosts: all
+  become: true
+  vars:
+    ansible_ssh_pass: 2398018966
+    ansible_become_pass: 2398018966
+  tasks:
+  # - name: Display all variables/facts known for a host
+  #   debug:
+  #     var: hostvars[inventory_hostname]
+  
+      
+  # - name: Display all variables/facts known for a host
+  #   debug:
+  #     var: ansible_distribution_release
+
+  - name: key
+    apt_key:
+      url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+      id: 7FCC7D46ACCC4CF8
+
+  - name: PPA
+    apt_repository:
+      repo: deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main
+      filename: postgresql
+      state: present
+
+  - name: Install PostgreSQL 11
+    apt:
+      update_cache: yes
+      name: postgresql-11
+      state: present
+ 
+  - name: supression du cluster main
+    shell:
+      cmd: pg_dropcluster 11 main --stop
+      removes: "/etc/postgresql/11/main/postgresql.conf"
+
+  - name: création du cluster ea
+    shell:
+      cmd: pg_createcluster 11 ea
+      creates: "/etc/postgresql/11/ea"
+
+  - name: démarrage et activtion du cluster au démarrage
+    service:
+        name: postgresql@11-ea # required. Name of the service.
+        enabled: yes # not required. Whether the service should start on boot. B(At least one of state and enabled are required.)
+        state: started # not required. choices: reloaded;restarted;started;stopped. C(started)/C(stopped) are idempotent actions that will not run commands unless necessary.  C(restarted) will always bounce the service.  C(reloaded) will always reload. B(At least one of state and enabled are required.) Note that reloaded will start the service if it is not already started, even if your chosen init system wouldn't normally.
+
+
+  # - name: add new configuration to "server.conf"
+  #   blockinfile:
+  #     create: yes
+  #     dest: /var/lib/pgsql/9.4/data/server.conf
+  #     block: |
+  #       listen_addresses = '*'
+  #       wal_level = hot_standby
+  #       checkpoint_segments = 10
+  #       max_wal_senders = 6
+  #       wal_keep_segments = 10
+  #       hot_standby = on
+
+  # - name: add new configuration to "pg_hba.conf"
+  #   blockinfile:
+  #     dest: /var/lib/pgsql/9.4/data/pg_hba.conf
+  #     block: |
+  #       host    all             all             0.0.0.0/0                md5
+  #       host    replication     replicant       0.0.0.0/0                md5
+  
+
+
+  # - lineinfile:
+  #     path:  /etc/postgresql/9.5/main/postgresql.conf 
+  #     state: present # not required. choices: absent;present. Whether the line should be there or not.
+  #     regexp: '#?{{ item.regexp }}\s*=.*'
+  #     line: "{{ item.regexp }} = {{ item.line }}"
+  #   with_items:
+  #     - { regexp: 'max_connections', line: '30' }
+  #     - { regexp: 'shared_buffers', line: '4GB' }
+  #     - { regexp: 'effective_cache_size', line: '12GB' }
+  #     - { regexp: 'maintenance_work_mem', line: '1GB' }
+  #     - { regexp: 'checkpoint_completion_target', line: '0.7' }
+  #     - { regexp: 'wal_buffers', line: '16MB' }
+  #     - { regexp: 'default_statistics_target', line: '100' }
+  #     - { regexp: 'random_page_cost', line: '1.1' }
+  #     - { regexp: 'effective_io_concurrency', line: '200' }
+  #     - { regexp: 'work_mem', line: '139811kB' }
+  #     - { regexp: 'min_wal_size', line: '1GB' }
+  #     - { regexp: 'max_wal_size', line: '2GB' }
+  #     - { regexp: 'max_worker_processes', line: '8' }
+  #   notify:
+  #     - restart postgresql
+  
+  # handlers:
+  # - name: restart postgresql
+  #   service:
+  #       name: postgresql
+  #       state: restarted
